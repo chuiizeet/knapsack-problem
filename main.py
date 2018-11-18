@@ -14,7 +14,7 @@ _trucks = np.array([
 #[1]: Weight
 #[2]: Vol
 #[3]: Value
-_instance = np.genfromtxt('instances/instance_1.csv', delimiter=',')
+_instance = np.genfromtxt('instances/instance_5.csv', delimiter=',')
 _binaryList = np.zeros(25)
 
 weight = []
@@ -25,7 +25,10 @@ sortedList = []
 truck1ItemList = []
 truck2ItemList = []
 
-#Equation: Value/(Weight*Vol)
+sumvW = 0.0
+sumvV = 0.0
+
+#Equation: (Value/weight)/(Σ(val/w)) + (Value/vol)/(Σ(val/vol))
 def getSortedList():
     for i in _instance:
         weight.append(int(i[1]))
@@ -33,16 +36,23 @@ def getSortedList():
         value.append(int(i[3]))
 
     _weightnp = np.asarray(weight)
-    _divweightnp = np.divide(19500, _weightnp)
     _volnp = np.asarray(vol)
-    _divvolnp = np.divide(5200, _volnp)
     _valuenp = np.asarray(value)
 
-    _prod = np.array(_divweightnp*_divvolnp)
-    _equation = np.array(_valuenp/_prod)
+    #Equation init
+    _divValWeightnp = np.divide(_valuenp, _weightnp)
+    _divValVolnp = np.divide(_valuenp, _volnp)
 
-    _indexSort = np.array(np.argsort(_equation))
-    _divSort = np.sort(_equation)
+    sumvW = np.sum(_divValWeightnp)
+    sumvV = np.sum(_divValVolnp)
+
+    _firstFactor = np.divide(_divValWeightnp, sumvW)
+    _secondFactor = np.divide(_divValVolnp, sumvV)
+
+    _prod = np.array(_firstFactor+_secondFactor)
+
+    _indexSort = np.array(np.argsort(_prod))
+    _divSort = np.sort(_prod)
 
     for j in range(0,len(_indexSort)):
         sortedList.append([_indexSort[j],_divSort[j]])
@@ -69,10 +79,8 @@ def truck2Space(index):
 def addItem():
     itemList = getSortedList()
     for x in range(len(itemList)-1,-1,-1):
-
         if(truck2Space(itemList[x][0]) == True):
             truck2ItemList.append(itemList[x][0])
-
         elif(truck1Space(itemList[x][0]) == True):
             truck1ItemList.append(itemList[x][0])
         else:
