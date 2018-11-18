@@ -25,8 +25,7 @@ sortedList = []
 truck1ItemList = []
 truck2ItemList = []
 
-
-#TODO: Create the general equation
+#Equation: Value/(Weight*Vol)
 def getSortedList():
     for i in _instance:
         weight.append(int(i[1]))
@@ -34,10 +33,16 @@ def getSortedList():
         value.append(int(i[3]))
 
     _weightnp = np.asarray(weight)
+    _divweightnp = np.divide(19500, _weightnp)
+    _volnp = np.asarray(vol)
+    _divvolnp = np.divide(5200, _volnp)
     _valuenp = np.asarray(value)
-    _div = np.divide(_valuenp,_weightnp)
-    _indexSort = np.array(np.argsort(_div))
-    _divSort = np.sort(_div)
+
+    _prod = np.array(_divweightnp*_divvolnp)
+    _equation = np.array(_valuenp/_prod)
+
+    _indexSort = np.array(np.argsort(_equation))
+    _divSort = np.sort(_equation)
 
     for j in range(0,len(_indexSort)):
         sortedList.append([_indexSort[j],_divSort[j]])
@@ -61,17 +66,15 @@ def truck2Space(index):
     else:
         return False
 
-
-
 def addItem():
     itemList = getSortedList()
     for x in range(len(itemList)-1,-1,-1):
 
-        if(truck1Space(itemList[x][0]) == True):
-            truck1ItemList.append(itemList[x][0])
-
-        elif(truck2Space(itemList[x][0]) == True):
+        if(truck2Space(itemList[x][0]) == True):
             truck2ItemList.append(itemList[x][0])
+
+        elif(truck1Space(itemList[x][0]) == True):
+            truck1ItemList.append(itemList[x][0])
         else:
             break
 
@@ -86,7 +89,5 @@ def addItem():
     print("Truck2 Weight: "+str(_trucks[1][0]))
     print("Truck2 Vol: "+str(_trucks[1][1]))
     print("Truck2 Value: "+str(_trucks[1][2]))
-
-
 
 addItem()
