@@ -1,5 +1,18 @@
 import numpy as np
 import csv
+import sys
+from colorama import init
+init(strip=not sys.stdout.isatty()) # strip colors if stdout is redirected
+from termcolor import cprint
+from pyfiglet import figlet_format
+
+cprint(figlet_format('knapsack', font='big'))
+cprint("\tTruck 1: ", 'red', end="")
+print("3,500kg/1,200cm^3")
+cprint("\tTruck 2: ", 'green', end="")
+print("16,000kg/4,000cm^3")
+
+instance = input('\nWhich instance do you want to use?[1-5]: ')
 
 #Trucks
 #[0]: Weight
@@ -14,17 +27,16 @@ _trucks = np.array([
 #[1]: Weight
 #[2]: Vol
 #[3]: Value
-_instance = np.genfromtxt('instances/instance_5.csv', delimiter=',')
-_binaryList = np.zeros(25)
 
+#Global Vars
+# _binaryList = np.zeros() <---- Local search
+_instance = np.genfromtxt('instances/instance_'+str(instance)+'.csv', delimiter=',')
 weight = []
 vol = []
 value = []
 sortedList = []
-
 truck1ItemList = []
 truck2ItemList = []
-
 sumvW = 0.0
 sumvV = 0.0
 
@@ -48,7 +60,6 @@ def getSortedList():
 
     _firstFactor = np.divide(_divValWeightnp, sumvW)
     _secondFactor = np.divide(_divValVolnp, sumvV)
-
     _prod = np.array(_firstFactor+_secondFactor)
 
     _indexSort = np.array(np.argsort(_prod))
@@ -77,6 +88,7 @@ def truck2Space(index):
         return False
 
 def addItem():
+
     itemList = getSortedList()
     for x in range(len(itemList)-1,-1,-1):
         if(truck2Space(itemList[x][0]) == True):
@@ -86,16 +98,34 @@ def addItem():
         else:
             break
 
-    print("--------------------------")
-    print("Truck1 items: ", truck1ItemList)
-    print("Truck1 Weight: "+str(_trucks[0][0]))
-    print("Truck1 Vol: "+str(_trucks[0][1]))
-    print("Truck1 Value: "+str(_trucks[0][2]))
+    #New search
+    otherList = []
+    for y in range(len(itemList)-1,-1,-1):
+        if(itemList[y][0] not in truck1ItemList and itemList[y][0] not in truck2ItemList ):
+            otherList.append(itemList[y][0])
 
-    print("--------------------------")
-    print("Truck2 items: ", truck2ItemList)
-    print("Truck2 Weight: "+str(_trucks[1][0]))
-    print("Truck2 Vol: "+str(_trucks[1][1]))
-    print("Truck2 Value: "+str(_trucks[1][2]))
+    for z in otherList:
+        if(truck1Space(z) == True):
+            truck1ItemList.append(z)
+            print("\nNew search: Truck 1: add item "+str(z))
+        elif(truck2Space(z) == True):
+            truck2ItemList.append(z)
+            print("\nNew search: Truck 2: add item "+str(z))
+
+    cprint("--------------------------", 'red')
+    print("Truck 1 items: ", truck1ItemList)
+    print("Truck 1 Weight: "+str(_trucks[0][0]))
+    print("Truck 1 Vol: "+str(_trucks[0][1]))
+    print("Truck 1 Value: "+str(_trucks[0][2]))
+    cprint("--------------------------", 'red')
+
+    cprint("--------------------------", 'green')
+    print("Truck 2 items: ", truck2ItemList)
+    print("Truck 2 Weight: "+str(_trucks[1][0]))
+    print("Truck 2 Vol: "+str(_trucks[1][1]))
+    print("Truck 2 Value: "+str(_trucks[1][2]))
+    cprint("--------------------------", 'green')
+    cprint("\nTotal value: ", "yellow", end="")
+    print(int(_trucks[0][2])+int(_trucks[1][2]))
 
 addItem()
